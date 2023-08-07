@@ -1,5 +1,5 @@
 {
-  "name": "xrpl-address-getter",
+  "name": "xrpl-publicKey-getter",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
