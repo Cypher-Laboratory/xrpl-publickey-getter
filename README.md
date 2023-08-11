@@ -1,1 +1,1 @@
-# XRPL-address-getter
+# XRPL-pubKey-getter
