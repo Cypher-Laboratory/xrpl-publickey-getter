@@ -1,7 +1,10 @@
-import { getPubKeysFromAddresses } from "../src/pubKeyGetter";
+import { getPubKeysFromAddresses } from "../src";
 
-const address = "rJuGxtNrgy6MDwD7cAJBkwyzceJ31YytCG";
+const address = "rJumr5e1HwiuV543H7bqixhtFreChWTaHH";
+
 async function test() {
-  console.log(await getPubKeysFromAddresses([address]));
+  const a = await getPubKeysFromAddresses([address]);
+  console.log(a);
 }
+
 test();
