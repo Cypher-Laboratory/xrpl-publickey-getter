@@ -18,7 +18,7 @@ export interface Account {
 
 /**
  * Get the public keys from an array of addresses
- * 
+ *
  * @param addresses - The addresses to get the public keys from
  * @returns A promise which resolves to an array of Account objects
  */
@@ -30,7 +30,10 @@ export async function getPubKeysFromAddresses(
     addresses.map(async (address) => {
       const latestTx = await getLatestTx(address);
       const xPubkey = getXPubkeyFromLatestTx(latestTx);
-      if(xPubkey === "0x") throw new Error("Error while retrieving xPubkey from latest transaction");
+      if (xPubkey === "0x")
+        throw new Error(
+          "Error while retrieving xPubkey from latest transaction",
+        );
       return BigInt("0x" + xPubkey);
     }),
   );
