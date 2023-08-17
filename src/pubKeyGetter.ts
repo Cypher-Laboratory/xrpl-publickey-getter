@@ -135,7 +135,6 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
  * @returns The Y values from the xPubKeys
  */
 function getYPubKeys(xPubKeys: bigint[]): bigint[] {
-  console.log(`"getYPubKeys" Function not implemented.`);
   return xPubKeys.map((xPubKey) => {
     const yValue = square_root_mod_prime(
       modulo(xPubKey * xPubKey * xPubKey + 7n, P), // = y^2

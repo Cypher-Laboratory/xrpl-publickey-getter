@@ -1,5 +1,5 @@
 import { getPubKeysFromAddresses } from "../src";
-import { P_SECP256k1 as P } from "../src/utils/constants";
+import { P_SECP256k1 as P } from "../src/utils";
 import { modulo } from "../src/utils";
 
 const address = "rBtttd61FExHC68vsZ8dqmS3DfjFEceA1A"; // "rJumr5e1HwiuV543H7bqixhtFreChWTaHH";
