@@ -58,6 +58,7 @@ export async function getLatestTx(
     forward: false,
   });
   await client.disconnect();
+  
   return response.result.transactions;
 }
 
