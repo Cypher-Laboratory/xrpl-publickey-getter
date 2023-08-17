@@ -103,40 +103,28 @@ function jacobi(a: bigint, n: bigint): bigint {
 }
 
 /**
- * computes number ** power mod modulus
+ * computes base ** power mod modulus
  *
- * @param number - the number to be raised to the power
- * @param power - the power to raise the number to
+ * @param base - the base to be raised to the power
+ * @param power - the power to raise the base to
  * @param modulus - the modulus
- * @returns number ** power mod modulus
+ * @returns base ** power mod modulus
  */
-export function pow(number: bigint, power: bigint, modulus?: bigint): bigint {
-  // // tested: looks ok
-  // if (modulus) {
-  //   assert(0 <= modulus, "modulus must be >= 0");
-  //   console.log("number : ", number);
-  //   console.log("power : ", power);
-  //   return modulo(number ** power, modulus); // Maximum BigInt size exceeded here
-  // }
-  // return number ** power;
-
-  // custom pow function
+export function pow(base: bigint, power: bigint, modulus = 1n): bigint {
   if (power === 0n) {
-    return 1n;
+    return 1n % modulus;
   }
 
   let result = 1n;
   while (power > 0n) {
     if (power % 2n === 1n) {
-      result *= number;
+      result = (result * base) % modulus;
     }
-    number *= number;
+    base = (base * base) % modulus;
     power >>= 1n;
   }
-
   return result;
 }
-
 
 /**
  * Polynomial exponentiation modulo a polynomial over ints mod p.

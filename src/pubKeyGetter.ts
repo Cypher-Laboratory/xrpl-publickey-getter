@@ -16,6 +16,12 @@ export interface Account {
   publicKey: [bigint, bigint];
 }
 
+/**
+ * Get the public keys from an array of addresses
+ * 
+ * @param addresses - The addresses to get the public keys from
+ * @returns A promise which resolves to an array of Account objects
+ */
 export async function getPubKeysFromAddresses(
   addresses: string[],
 ): Promise<Account[]> {
@@ -23,8 +29,8 @@ export async function getPubKeysFromAddresses(
   const xPubKeys = await Promise.all(
     addresses.map(async (address) => {
       const latestTx = await getLatestTx(address);
-      console.log("latestTx: ", latestTx);
       const xPubkey = getXPubkeyFromLatestTx(latestTx);
+      if(xPubkey === "0x") throw new Error("Error while retrieving xPubkey from latest transaction");
       return BigInt("0x" + xPubkey);
     }),
   );
@@ -75,7 +81,6 @@ export function getXPubkeyFromLatestTx(
   latestTx: AccountTxTransaction[],
 ): string {
   for (let i = 0; i < latestTx.length; i++) {
-    console.log(latestTx[i])
     //check if the Account in the .tx is the address derived from the pubkey
     if (
       getAddressFromXPubkey(latestTx[i]?.tx?.SigningPubKey ?? "0x") ===
