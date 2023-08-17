@@ -1,1 +1,0 @@
-export { getPubKeysFromAddresses } from "./pubKeyGetter";

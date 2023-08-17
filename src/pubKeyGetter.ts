@@ -6,8 +6,6 @@ import assert from "assert";
 import crypto from "crypto";
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 import baseX from "base-x";
-import { modulo, sqrt_mod_inverse } from "./utils";
-import { P_SECP256k1 as P } from "./utils";
 
 const base58 = baseX(R_B58_DICT);
 
@@ -29,7 +27,7 @@ export async function getPubKeysFromAddresses(
   );
 
   // get the Y values from the xPubKeys
-  const yValues: bigint[] = getYPubKeys(xPubKeys, P);
+  const yValues: bigint[] = getYPubKeys(xPubKeys);
 
   return addresses.map((address, index) => {
     return {
@@ -81,7 +79,7 @@ export function getXPubkeyFromLatestTx(
       return latestTx[i]?.tx?.SigningPubKey ?? "0x";
     }
   }
-  throw new Error("No pubkey found in latest transaction");
+  return "0x";
 }
 
 /**
@@ -123,12 +121,9 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
  * @param xPubKeys - The xPubKeys to get the Y values from
  * @returns The Y values from the xPubKeys
  */
-function getYPubKeys(xPubKeys: bigint[], P: bigint): bigint[] {
+function getYPubKeys(xPubKeys: bigint[]): bigint[] {
+  console.log(`"getYPubKeys" Function not implemented.`);
   return xPubKeys.map((xPubKey) => {
-    const yValue = sqrt_mod_inverse(
-      modulo(xPubKey * xPubKey * xPubKey + 7n, P), // = y^2
-      P,
-    );
-    return yValue;
+    return xPubKey;
   });
 }
