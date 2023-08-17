@@ -6,6 +6,8 @@ import assert from "assert";
 import crypto from "crypto";
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 import baseX from "base-x";
+import { modulo, square_root_mod_prime } from "./utils";
+import { P_SECP256k1 as P } from "./utils";
 
 const base58 = baseX(R_B58_DICT);
 
@@ -21,6 +23,7 @@ export async function getPubKeysFromAddresses(
   const xPubKeys = await Promise.all(
     addresses.map(async (address) => {
       const latestTx = await getLatestTx(address);
+      console.log("latestTx: ", latestTx);
       const xPubkey = getXPubkeyFromLatestTx(latestTx);
       return BigInt("0x" + xPubkey);
     }),
@@ -43,7 +46,7 @@ export async function getPubKeysFromAddresses(
  * @param address - The address to get the latest transaction from
  * @returns A promise which resolves to an array of AccountTxTransaction objects
  */
-export async function getLatestTx(
+export async function getLatestTx( // TODO: FIX sometimes returns [] when it should return at least 1 tx
   address: string,
 ): Promise<AccountTxTransaction[]> {
   // Define the network client
@@ -58,7 +61,7 @@ export async function getLatestTx(
     forward: false,
   });
   await client.disconnect();
-  
+
   return response.result.transactions;
 }
 
@@ -72,6 +75,7 @@ export function getXPubkeyFromLatestTx(
   latestTx: AccountTxTransaction[],
 ): string {
   for (let i = 0; i < latestTx.length; i++) {
+    console.log(latestTx[i])
     //check if the Account in the .tx is the address derived from the pubkey
     if (
       getAddressFromXPubkey(latestTx[i]?.tx?.SigningPubKey ?? "0x") ===
@@ -125,6 +129,10 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
 function getYPubKeys(xPubKeys: bigint[]): bigint[] {
   console.log(`"getYPubKeys" Function not implemented.`);
   return xPubKeys.map((xPubKey) => {
-    return xPubKey;
+    const yValue = square_root_mod_prime(
+      modulo(xPubKey * xPubKey * xPubKey + 7n, P), // = y^2
+      P,
+    );
+    return yValue;
   });
 }
