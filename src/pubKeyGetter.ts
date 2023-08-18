@@ -74,16 +74,13 @@ export function getXPubkeyFromLatestTx(
   latestTx: AccountTxTransaction[],
 ): string {
   for (let i = 0; i < latestTx.length; i++) {
-    //check if the Account in the .tx is the address derived from the pubkey
-    if (
-      getAddressFromXPubkey(latestTx[i]?.tx?.SigningPubKey ?? "0x") ===
-      latestTx[i].tx?.Account
-    ) {
-      return latestTx[i]?.tx?.SigningPubKey ?? "0x";
+    // Check if the Account in the .tx is the address derived from the pubkey
+    const signingPubKey = latestTx[i]?.tx?.SigningPubKey ?? "0x";
+    if (getAddressFromXPubkey(signingPubKey) === latestTx[i].tx?.Account) {
+      return signingPubKey;
     }
   }
-
-  return "0x";
+  throw new Error("No valid pubkey found in the latest transactions");
 }
 
 /**
@@ -126,9 +123,7 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
  * @returns The Y values from the xPubKeys
  */
 function getYPubKeys(xPubKeys: string[]): bigint[] {
-  console.log(`"getYPubKeys" Function not implemented.`);
   return xPubKeys.map((xPubKey) => {
-    console.log(xPubKey);
     //check on wich curve we are
     if (xPubKey.startsWith("ED")) {
       //delete the ED prefix
@@ -154,6 +149,6 @@ function getYPubKeys(xPubKeys: string[]): bigint[] {
         console.error("Invalid x-coordinate value:", error);
       }
     }
-    return 0n;
+    throw new Error("Error while computing y coordinate");
   });
 }
