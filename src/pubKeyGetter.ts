@@ -82,7 +82,7 @@ export function getXPubkeyFromLatestTx(
       return latestTx[i]?.tx?.SigningPubKey ?? "0x";
     }
   }
-  
+
   return "0x";
 }
 
