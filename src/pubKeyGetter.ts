@@ -128,7 +128,7 @@ function getYPubKeys(xPubKeys: string[]): bigint[] {
   console.log(`"getYPubKeys" Function not implemented.`);
   return xPubKeys.map((xPubKey) => {
     console.log(xPubKey);
-    //check on wich curve we are 
+    //check on wich curve we are
     if (xPubKey.startsWith("ED")) {
       //delete the ED prefix
       //compute on ed255919
@@ -143,7 +143,7 @@ function getYPubKeys(xPubKeys: string[]): bigint[] {
       }
     } else {
       //compute on secp256k1
-      const xValue = BigInt(`0x${xPubKey}`); 
+      const xValue = BigInt(`0x${xPubKey}`);
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         const point = secp256k1.curve.pointFromX(xPubKey);
@@ -154,6 +154,6 @@ function getYPubKeys(xPubKeys: string[]): bigint[] {
         console.error("Invalid x-coordinate value:", error);
       }
     }
-    return 0n; 
+    return 0n;
   });
 }
