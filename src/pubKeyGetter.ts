@@ -6,8 +6,11 @@ import assert from "assert";
 import crypto from "crypto";
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 import baseX from "base-x";
+import { ec } from "elliptic";
 
 const base58 = baseX(R_B58_DICT);
+const secp256k1 = new ec("secp256k1");
+const ed25519 = new ec("ed25519");
 
 export interface Account {
   address: string;
@@ -22,7 +25,7 @@ export async function getPubKeysFromAddresses(
     addresses.map(async (address) => {
       const latestTx = await getLatestTx(address);
       const xPubkey = getXPubkeyFromLatestTx(latestTx);
-      return BigInt("0x" + xPubkey);
+      return xPubkey;
     }),
   );
 
@@ -32,7 +35,7 @@ export async function getPubKeysFromAddresses(
   return addresses.map((address, index) => {
     return {
       address,
-      publicKey: [xPubKeys[index], yValues[index]],
+      publicKey: [BigInt("0x" + xPubKeys[index]), yValues[index]],
     };
   });
 }
@@ -121,9 +124,36 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
  * @param xPubKeys - The xPubKeys to get the Y values from
  * @returns The Y values from the xPubKeys
  */
-function getYPubKeys(xPubKeys: bigint[]): bigint[] {
+function getYPubKeys(xPubKeys: string[]): bigint[] {
   console.log(`"getYPubKeys" Function not implemented.`);
   return xPubKeys.map((xPubKey) => {
-    return xPubKey;
+    console.log(xPubKey);
+    //check on wich curve we are 
+    if (xPubKey.startsWith("ED")) {
+      //delete the ED prefix
+      //compute on ed255919
+      try {
+        // Use the `curve.pointFromX()` method to retrieve the point on the curve
+        const point = ed25519.curve.pointFromX(xPubKey.slice(2));
+        // Access the y-coordinate from the retrieved point
+        const yValue = point.getY().toString();
+        return BigInt(yValue);
+      } catch (error) {
+        console.error("Invalid x-coordinate value:", error);
+      }
+    } else {
+      //compute on secp256k1
+      const xValue = BigInt(`0x${xPubKey}`); 
+      try {
+        // Use the `curve.pointFromX()` method to retrieve the point on the curve
+        const point = secp256k1.curve.pointFromX(xPubKey);
+        // Access the y-coordinate from the retrieved point
+        const yValue = point.getY().toString();
+        return BigInt(yValue);
+      } catch (error) {
+        console.error("Invalid x-coordinate value:", error);
+      }
+    }
+    return 0n; 
   });
 }
