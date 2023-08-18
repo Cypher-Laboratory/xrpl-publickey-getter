@@ -143,7 +143,6 @@ function getYPubKeys(xPubKeys: string[]): bigint[] {
       }
     } else {
       //compute on secp256k1
-      const xValue = BigInt(`0x${xPubKey}`);
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         const point = secp256k1.curve.pointFromX(xPubKey);
