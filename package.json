@@ -19,6 +19,7 @@
   "author": "Elli610 && LeJamon",
   "license": "ISC",
   "dependencies": {
+    "@types/elliptic": "^6.4.14",
     "base-x": "^3.0.9",
     "crypto": "^1.0.1",
     "prettier": "^3.0.0",
