@@ -15,7 +15,7 @@ const ed25519 = new ec("ed25519");
 export interface Account {
   address: string;
   publicKey: [bigint, bigint];
-  curve: string; 
+  curve: string;
 }
 
 export async function getPubKeysFromAddresses(
@@ -31,14 +31,13 @@ export async function getPubKeysFromAddresses(
   );
 
   // get the Y values from the xPubKeys
-  const yValues: [bigint,string][] = getYPubKeys(xPubKeys);
-
+  const yValues: [bigint, string][] = getYPubKeys(xPubKeys);
 
   return addresses.map((address, index) => {
     return {
       address,
       publicKey: [BigInt("0x" + xPubKeys[index]), yValues[index][0]],
-      curve :yValues[index][1],
+      curve: yValues[index][1],
     };
   });
 }
@@ -125,8 +124,7 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
  * @param xPubKeys - The xPubKeys to get the Y values from
  * @returns The Y values from the xPubKeys
  */
-function getYPubKeys(xPubKeys: string[]):[bigint,string][] {
-
+function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
   return xPubKeys.map((xPubKey) => {
     // Check which curve we are on
     if (xPubKey.startsWith("ED")) {
