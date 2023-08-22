@@ -15,6 +15,7 @@ const ed25519 = new ec("ed25519");
 export interface Account {
   address: string;
   publicKey: [bigint, bigint];
+  curve: string;
 }
 
 export async function getPubKeysFromAddresses(
@@ -30,12 +31,13 @@ export async function getPubKeysFromAddresses(
   );
 
   // get the Y values from the xPubKeys
-  const yValues: bigint[] = getYPubKeys(xPubKeys);
+  const yValues: [bigint, string][] = getYPubKeys(xPubKeys);
 
   return addresses.map((address, index) => {
     return {
       address,
-      publicKey: [BigInt("0x" + xPubKeys[index]), yValues[index]],
+      publicKey: [BigInt("0x" + xPubKeys[index]), yValues[index][0]],
+      curve: yValues[index][1],
     };
   });
 }
@@ -122,29 +124,29 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
  * @param xPubKeys - The xPubKeys to get the Y values from
  * @returns The Y values from the xPubKeys
  */
-function getYPubKeys(xPubKeys: string[]): bigint[] {
+function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
   return xPubKeys.map((xPubKey) => {
-    //check on wich curve we are
+    // Check which curve we are on
     if (xPubKey.startsWith("ED")) {
-      //delete the ED prefix
-      //compute on ed255919
+      // Delete the "ED" prefix
+      // Compute on ed25519
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         const point = ed25519.curve.pointFromX(xPubKey.slice(2));
         // Access the y-coordinate from the retrieved point
         const yValue = point.getY().toString();
-        return BigInt(yValue);
+        return [BigInt(yValue), "ed25519"] as [bigint, string];
       } catch (error) {
         console.error("Invalid x-coordinate value:", error);
       }
     } else {
-      //compute on secp256k1
+      // Compute on secp256k1
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         const point = secp256k1.curve.pointFromX(xPubKey);
         // Access the y-coordinate from the retrieved point
         const yValue = point.getY().toString();
-        return BigInt(yValue);
+        return [BigInt(yValue), "secp256k1"] as [bigint, string];
       } catch (error) {
         console.error("Invalid x-coordinate value:", error);
       }
