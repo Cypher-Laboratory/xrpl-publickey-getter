@@ -7,6 +7,7 @@ import crypto from "crypto";
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 import baseX from "base-x";
 import { ec } from "elliptic";
+import { xrplWssUrl } from "./const";
 
 const base58 = baseX(R_B58_DICT);
 const secp256k1 = new ec("secp256k1");
@@ -52,7 +53,7 @@ export async function getLatestTx(
   address: string,
 ): Promise<AccountTxTransaction[]> {
   // Define the network client
-  const client = new Client("wss://s.altnet.rippletest.net:51233/");
+  const client = new Client(xrplWssUrl);
   await client.connect();
 
   const response = await client.request({
