@@ -8,15 +8,11 @@ const addresses = [
 ];
 (async () => {
   // indep calls to getAddresses and getPubKeysFromAddresses
-  // console.log(await getPubKeysFromAddresses(addresses));
-  // console.log(await getAddresses(10n, 2));
+  console.log(await getPubKeysFromAddresses(addresses));
+  console.log(await getAddresses(10n, 2));
 
   // combined calls to getAddresses and getPubKeysFromAddresses
-  const addresses = await getAddresses(10n, 2);
-  console.log("addresses: ", addresses);
-  console.log(
-    await getPubKeysFromAddresses(
-      addresses,
-    )
-  );
+  const retrievedAddresses = await getAddresses(10n, 2);
+  console.log("addresses: ", retrievedAddresses);
+  console.log(await getPubKeysFromAddresses(retrievedAddresses));
 })();

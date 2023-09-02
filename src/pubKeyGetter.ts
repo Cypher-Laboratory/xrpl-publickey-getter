@@ -123,7 +123,7 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
  * Get the corresponding Y values from the xPubKeys for the SECP256k1 curve
  *
  * @param xPubKeys - The xPubKeys to get the Y values from
- * 
+ *
  * @returns The Y values from the xPubKeys
  */
 function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
@@ -141,7 +141,7 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
       } catch (error) {
         throw new Error("Invalid x-coordinate value: " + error);
       }
-    } else { 
+    } else {
       // Compute on secp256k1
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
