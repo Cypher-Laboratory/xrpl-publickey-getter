@@ -120,9 +120,10 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
 }
 
 /**
- * Get the corresponding Y values from the xPubKeys for the secp256k1 curve
+ * Get the corresponding Y values from the xPubKeys for the SECP256k1 curve
  *
  * @param xPubKeys - The xPubKeys to get the Y values from
+ * 
  * @returns The Y values from the xPubKeys
  */
 function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
@@ -138,9 +139,9 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         const yValue = point.getY().toString();
         return [BigInt(yValue), "ed25519"] as [bigint, string];
       } catch (error) {
-        console.error("Invalid x-coordinate value:", error);
+        throw new Error("Invalid x-coordinate value: " + error);
       }
-    } else {
+    } else { 
       // Compute on secp256k1
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
@@ -149,9 +150,8 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         const yValue = point.getY().toString();
         return [BigInt(yValue), "secp256k1"] as [bigint, string];
       } catch (error) {
-        console.error("Invalid x-coordinate value:", error);
+        throw new Error("Invalid x-coordinate value: " + error);
       }
     }
-    throw new Error("Error while computing y coordinate");
   });
 }

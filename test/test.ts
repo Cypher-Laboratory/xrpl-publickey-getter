@@ -7,6 +7,16 @@ const addresses = [
   "rH7NWezPqw5xmguR27C847ZjSmtHnLkt2B", // address on secp256k1
 ];
 (async () => {
-  console.log(await getPubKeysFromAddresses(addresses));
-  console.log(await getAddresses(10n, 2));
+  // indep calls to getAddresses and getPubKeysFromAddresses
+  // console.log(await getPubKeysFromAddresses(addresses));
+  // console.log(await getAddresses(10n, 2));
+
+  // combined calls to getAddresses and getPubKeysFromAddresses
+  const addresses = await getAddresses(10n, 2);
+  console.log("addresses: ", addresses);
+  console.log(
+    await getPubKeysFromAddresses(
+      addresses,
+    )
+  );
 })();
