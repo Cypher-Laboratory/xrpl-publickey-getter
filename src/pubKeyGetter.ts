@@ -130,10 +130,10 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
   return xPubKeys.map((xPubKey) => {
     // Check which curve we are on
     if (xPubKey.startsWith("ED")) {
-      // Delete the "ED" prefix
       // Compute on ed25519
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
+        // Get ride of the ED prefix indicating that the curve is on ed25519
         const point = ed25519.curve.pointFromX(xPubKey.slice(2));
         // Access the y-coordinate from the retrieved point
         const yValue = point.getY().toString();
@@ -145,7 +145,9 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
       // Compute on secp256k1
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
-        const point = secp256k1.curve.pointFromX(xPubKey);
+        // Get ride of the prefix (02/03) that indicate if y coordinate is odd or not
+        // see xrpl doc here : https://xrpl.org/cryptographic-keys.html
+        const point = secp256k1.curve.pointFromX(xPubKey).slice(2);
         // Access the y-coordinate from the retrieved point
         const yValue = point.getY().toString();
         return [BigInt(yValue), "secp256k1"] as [bigint, string];
