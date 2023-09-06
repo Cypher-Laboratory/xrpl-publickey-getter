@@ -1,1 +1,2 @@
-export * from "./pubKeyGetter";
+export { getAddresses } from "./addressGetter";
+export { getPubKeysFromAddresses, Account } from "./pubKeyGetter";

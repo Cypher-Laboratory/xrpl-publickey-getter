@@ -7,6 +7,7 @@ import crypto from "crypto";
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 import baseX from "base-x";
 import { ec } from "elliptic";
+import { xrplWssUrl } from "./const";
 
 const base58 = baseX(R_B58_DICT);
 const secp256k1 = new ec("secp256k1");
@@ -52,7 +53,7 @@ export async function getLatestTx(
   address: string,
 ): Promise<AccountTxTransaction[]> {
   // Define the network client
-  const client = new Client("wss://s.altnet.rippletest.net:51233/");
+  const client = new Client(xrplWssUrl);
   await client.connect();
 
   const response = await client.request({
@@ -119,9 +120,10 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
 }
 
 /**
- * Get the corresponding Y values from the xPubKeys for the secp256k1 curve
+ * Get the corresponding Y values from the xPubKeys for the SECP256k1 curve
  *
  * @param xPubKeys - The xPubKeys to get the Y values from
+ *
  * @returns The Y values from the xPubKeys
  */
 function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
@@ -137,7 +139,7 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         const yValue = point.getY().toString();
         return [BigInt(yValue), "ed25519"] as [bigint, string];
       } catch (error) {
-        console.error("Invalid x-coordinate value:", error);
+        throw new Error("Invalid x-coordinate value: " + error);
       }
     } else {
       // Compute on secp256k1
@@ -150,9 +152,8 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         const yValue = point.getY().toString();
         return [BigInt(yValue), "secp256k1"] as [bigint, string];
       } catch (error) {
-        console.error("Invalid x-coordinate value:", error);
+        throw new Error("Invalid x-coordinate value: " + error);
       }
     }
-    throw new Error("Error while computing y coordinate");
   });
 }
