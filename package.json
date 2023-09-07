@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"no test specified\" && exit 0",
     "lint": "eslint .",
@@ -21,7 +23,6 @@
   "dependencies": {
     "@types/elliptic": "^6.4.14",
     "base-x": "^3.0.9",
-    "crypto": "^1.0.1",
     "prettier": "^3.0.0",
     "ts-node": "^10.9.1",
     "xrpl": "^2.9.1"
