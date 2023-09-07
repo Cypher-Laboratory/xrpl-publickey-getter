@@ -1,27 +1,23 @@
+"use strict";
 // IMPORTANT LINK : https://github.com/XRPLF/xrpl-dev-portal/blob/master/content/_code-samples/address_encoding/js/encode_address.js
 // IMPORTANT LINK : https://xrpl.org/accounts.html#addresses
-
-import { Client, AccountTxTransaction } from "xrpl";
-import * as assert from "assert";
-import * as crypto from "crypto";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getAddressFromXPubkey =
+  exports.getXPubkeyFromLatestTx =
+  exports.getLatestTx =
+  exports.getPubKeysFromAddresses =
+    void 0;
+const xrpl_1 = require("xrpl");
+const assert = require("assert");
+const crypto = require("crypto");
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
-import * as baseX from "base-x";
-import { ec } from "elliptic";
-import { xrplWssUrl } from "./const";
-
+const baseX = require("base-x");
+const elliptic_1 = require("elliptic");
+const const_1 = require("./const");
 const base58 = baseX(R_B58_DICT);
-const secp256k1 = new ec("secp256k1");
-const ed25519 = new ec("ed25519");
-
-export interface Account {
-  address: string;
-  publicKey: [bigint, bigint];
-  curve: string;
-}
-
-export async function getPubKeysFromAddresses(
-  addresses: string[],
-): Promise<Account[]> {
+const secp256k1 = new elliptic_1.ec("secp256k1");
+const ed25519 = new elliptic_1.ec("ed25519");
+async function getPubKeysFromAddresses(addresses) {
   // get the xPubKeys from the addresses
   const xPubKeys = await Promise.all(
     addresses.map(async (address) => {
@@ -30,10 +26,8 @@ export async function getPubKeysFromAddresses(
       return xPubkey;
     }),
   );
-
   // get the Y values from the xPubKeys
-  const yValues: [bigint, string][] = getYPubKeys(xPubKeys);
-
+  const yValues = getYPubKeys(xPubKeys);
   return addresses.map((address, index) => {
     return {
       address,
@@ -42,20 +36,17 @@ export async function getPubKeysFromAddresses(
     };
   });
 }
-
+exports.getPubKeysFromAddresses = getPubKeysFromAddresses;
 /**
  * Get the latest transaction from an address
  *
  * @param address - The address to get the latest transaction from
  * @returns A promise which resolves to an array of AccountTxTransaction objects
  */
-export async function getLatestTx(
-  address: string,
-): Promise<AccountTxTransaction[]> {
+async function getLatestTx(address) {
   // Define the network client
-  const client = new Client(xrplWssUrl);
+  const client = new xrpl_1.Client(const_1.xrplWssUrl);
   await client.connect();
-
   const response = await client.request({
     command: "account_tx",
     account: address,
@@ -66,16 +57,14 @@ export async function getLatestTx(
   await client.disconnect();
   return response.result.transactions;
 }
-
+exports.getLatestTx = getLatestTx;
 /**
  * Get the pubkey from the latest transaction
  *
  * @param latestTx - The latest transaction from an address
  * @returns The pubkey from the latest transaction
  */
-export function getXPubkeyFromLatestTx(
-  latestTx: AccountTxTransaction[],
-): string {
+function getXPubkeyFromLatestTx(latestTx) {
   for (let i = 0; i < latestTx.length; i++) {
     // Check if the Account in the .tx is the address derived from the pubkey
     const signingPubKey = latestTx[i]?.tx?.SigningPubKey ?? "0x";
@@ -85,14 +74,14 @@ export function getXPubkeyFromLatestTx(
   }
   throw new Error("No valid pubkey found in the latest transactions");
 }
-
+exports.getXPubkeyFromLatestTx = getXPubkeyFromLatestTx;
 /**
  * Get the XRPL address from the xPubkey
  *
  * @param pubkeyHex - The pubkey to get the XRPL address from
  * @returns The XRPL address (base58 encoded)
  */
-export function getAddressFromXPubkey(pubkeyHex: string): string {
+function getAddressFromXPubkey(pubkeyHex) {
   const pubkey = Buffer.from(pubkeyHex, "hex");
   assert(pubkey.length == 33);
   // Calculate the RIPEMD160 hash of the SHA-256 hash of the public key
@@ -118,7 +107,7 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
   const address = base58.encode(dataToEncode);
   return address;
 }
-
+exports.getAddressFromXPubkey = getAddressFromXPubkey;
 /**
  * Get the corresponding Y values from the xPubKeys for the SECP256k1 curve
  *
@@ -126,7 +115,7 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
  *
  * @returns The Y values from the xPubKeys
  */
-function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
+function getYPubKeys(xPubKeys) {
   return xPubKeys.map((xPubKey) => {
     // Check which curve we are on
     if (xPubKey.startsWith("ED")) {
@@ -137,7 +126,7 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         const point = ed25519.curve.pointFromX(xPubKey.slice(2));
         // Access the y-coordinate from the retrieved point
         const yValue = point.getY().toString();
-        return [BigInt(yValue), "ed25519"] as [bigint, string];
+        return [BigInt(yValue), "ed25519"];
       } catch (error) {
         throw new Error("Invalid x-coordinate value: " + error);
       }
@@ -150,7 +139,7 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         const point = secp256k1.curve.pointFromX(xPubKey).slice(2);
         // Access the y-coordinate from the retrieved point
         const yValue = point.getY().toString();
-        return [BigInt(yValue), "secp256k1"] as [bigint, string];
+        return [BigInt(yValue), "secp256k1"];
       } catch (error) {
         throw new Error("Invalid x-coordinate value: " + error);
       }
