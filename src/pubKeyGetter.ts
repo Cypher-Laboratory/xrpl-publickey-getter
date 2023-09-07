@@ -3,11 +3,11 @@
 
 import { Client, AccountTxTransaction } from "xrpl";
 import * as assert from "assert";
-import * as crypto from "crypto";
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 import * as baseX from "base-x";
 import { ec } from "elliptic";
 import { xrplWssUrl } from "./const";
+import { createHash } from "node:crypto";
 
 const base58 = baseX(R_B58_DICT);
 const secp256k1 = new ec("secp256k1");
@@ -97,8 +97,8 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
   assert(pubkey.length == 33);
   // Calculate the RIPEMD160 hash of the SHA-256 hash of the public key
   //   This is the "Account ID"
-  const pubkey_inner_hash = crypto.createHash("sha256").update(pubkey);
-  const pubkey_outer_hash = crypto.createHash("ripemd160");
+  const pubkey_inner_hash = createHash("sha256").update(pubkey);
+  const pubkey_outer_hash = createHash("ripemd160");
   pubkey_outer_hash.update(pubkey_inner_hash.digest());
   const account_id = pubkey_outer_hash.digest();
   // Prefix the Account ID with the type prefix for an XRPL Classic Address, then
@@ -106,11 +106,8 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
   //   of the Account ID
   const address_type_prefix = Buffer.from([0x00]);
   const payload = Buffer.concat([address_type_prefix, account_id]);
-  const chksum_hash1 = crypto.createHash("sha256").update(payload).digest();
-  const chksum_hash2 = crypto
-    .createHash("sha256")
-    .update(chksum_hash1)
-    .digest();
+  const chksum_hash1 = createHash("sha256").update(payload).digest();
+  const chksum_hash2 = createHash("sha256").update(chksum_hash1).digest();
   const checksum = chksum_hash2.slice(0, 4);
   // Concatenate the address type prefix, the payload, and the checksum.
   // Base-58 encode the encoded value to get the address.
