@@ -12,7 +12,7 @@ const addresses = [
   console.log(await getAddresses(10n, 2));
 
   // combined calls to getAddresses and getPubKeysFromAddresses
-  const retrievedAddresses = await getAddresses(10n, 2);
+  const retrievedAddresses = await getAddresses(10n, 5);
   console.log("addresses: ", retrievedAddresses);
   console.log(await getPubKeysFromAddresses(retrievedAddresses));
 })();

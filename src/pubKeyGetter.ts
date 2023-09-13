@@ -136,7 +136,9 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         const yValue = point.getY().toString();
         return [BigInt(yValue), "ed25519"] as [bigint, string];
       } catch (error) {
-        throw new Error("Invalid x-coordinate value: " + error);
+        // case where we have a point at infinity
+        console.log("Invalid x-coordinate value: " + error);
+        return [BigInt(0), "ed25519"] as [bigint, string];
       }
     } else {
       // Compute on secp256k1
@@ -144,7 +146,7 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         // Get ride of the prefix (02/03) that indicate if y coordinate is odd or not
         // see xrpl doc here : https://xrpl.org/cryptographic-keys.html
-        const point = secp256k1.curve.pointFromX(xPubKey).slice(2);
+        const point = secp256k1.curve.pointFromX(xPubKey.slice(2));
         // Access the y-coordinate from the retrieved point
         const yValue = point.getY().toString();
         return [BigInt(yValue), "secp256k1"] as [bigint, string];
