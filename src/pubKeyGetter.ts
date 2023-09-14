@@ -5,13 +5,13 @@ import { Client, AccountTxTransaction } from "xrpl";
 import * as assert from "assert";
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 import * as baseX from "base-x";
-import { ec } from "elliptic";
+import { ec,eddsa } from "elliptic";
 import { xrplWssUrl } from "./const";
 import { createHash } from "node:crypto";
 
 const base58 = baseX(R_B58_DICT);
 const secp256k1 = new ec("secp256k1");
-const ed25519 = new ec("ed25519");
+const ed25519 = new eddsa("ed25519");
 
 export interface Account {
   address: string;
@@ -37,7 +37,7 @@ export async function getPubKeysFromAddresses(
   return addresses.map((address, index) => {
     return {
       address,
-      publicKey: [BigInt("0x" + xPubKeys[index]), yValues[index][0]],
+      publicKey: [BigInt("0x" + xPubKeys[index].slice(2)), yValues[index][0]],
       curve: yValues[index][1],
     };
   });
@@ -131,9 +131,11 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         // Get ride of the ED prefix indicating that the curve is on ed25519
-        const point = ed25519.curve.pointFromX(xPubKey.slice(2));
-        // Access the y-coordinate from the retrieved point
-        const yValue = point.getY().toString();
+        const keypair = ed25519.keyFromPublic(xPubKey.slice(2)); 
+       
+        const xValue = BigInt("0x"+ed25519.decodePoint(keypair.getPublic()).getX().toString(16));
+        console.log(xValue); 
+        const yValue = BigInt("0x"+ed25519.decodePoint(keypair.getPublic()).getY().toString(16));
         return [BigInt(yValue), "ed25519"] as [bigint, string];
       } catch (error) {
         throw new Error("Invalid x-coordinate value: " + error);
@@ -144,7 +146,7 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         // Get ride of the prefix (02/03) that indicate if y coordinate is odd or not
         // see xrpl doc here : https://xrpl.org/cryptographic-keys.html
-        const point = secp256k1.curve.pointFromX(xPubKey).slice(2);
+        const point = secp256k1.curve.pointFromX((xPubKey).slice(2));
         // Access the y-coordinate from the retrieved point
         const yValue = point.getY().toString();
         return [BigInt(yValue), "secp256k1"] as [bigint, string];
