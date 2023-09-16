@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Client } from "xrpl";
 import { XrplTx } from "./interfaces/xrplTx";
 import { xrplWssUrl } from "./const";
