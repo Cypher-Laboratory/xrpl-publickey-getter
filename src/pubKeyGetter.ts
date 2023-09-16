@@ -32,13 +32,13 @@ export async function getPubKeysFromAddresses(
   );
 
   // get the Y values from the xPubKeys
-  const yValues: [bigint, string][] = getYPubKeys(xPubKeys);
+  const values: [bigint,bigint, string][] = getYPubKeys(xPubKeys);
 
   return addresses.map((address, index) => {
     return {
       address,
-      publicKey: [BigInt("0x" + xPubKeys[index].slice(2)), yValues[index][0]],
-      curve: yValues[index][1],
+      publicKey: [values[index][0], values[index][1]],
+      curve: values[index][2],
     };
   });
 }
@@ -123,7 +123,7 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
  *
  * @returns The Y values from the xPubKeys
  */
-function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
+function getYPubKeys(xPubKeys: string[]): [bigint, bigint, string][] {
   return xPubKeys.map((xPubKey) => {
     // Check which curve we are on
     if (xPubKey.startsWith("ED")) {
@@ -136,7 +136,7 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         const xValue = BigInt("0x"+ed25519.decodePoint(keypair.getPublic()).getX().toString(16));
         console.log(xValue); 
         const yValue = BigInt("0x"+ed25519.decodePoint(keypair.getPublic()).getY().toString(16));
-        return [BigInt(yValue), "ed25519"] as [bigint, string];
+        return [xValue,yValue, "ed25519"] as [bigint, bigint, string];
       } catch (error) {
         throw new Error("Invalid x-coordinate value: " + error);
       }
@@ -148,8 +148,9 @@ function getYPubKeys(xPubKeys: string[]): [bigint, string][] {
         // see xrpl doc here : https://xrpl.org/cryptographic-keys.html
         const point = secp256k1.curve.pointFromX((xPubKey).slice(2));
         // Access the y-coordinate from the retrieved point
-        const yValue = point.getY().toString();
-        return [BigInt(yValue), "secp256k1"] as [bigint, string];
+        const xValue = point.getX().toString(16); 
+        const yValue = point.getY().toString(16);
+        return [BigInt("0x"+xValue),BigInt("0x"+yValue), "secp256k1"] as [bigint,bigint, string];
       } catch (error) {
         throw new Error("Invalid x-coordinate value: " + error);
       }
