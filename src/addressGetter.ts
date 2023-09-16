@@ -4,6 +4,7 @@ import { xrplWssUrl } from "./const";
 import { getAddressFromXPubkey } from "./pubKeyGetter";
 import { getXrpBalance } from "./utils/getXrpBalance";
 import { XrplAccount } from "./interfaces/xrplAccount";
+import { Curve } from "./utils/curves";
 
 /**
  * Get the addresses from the XRPL ledger where balance >= amountMin
@@ -16,6 +17,7 @@ import { XrplAccount } from "./interfaces/xrplAccount";
 export async function getAddresses(
   amountMin: bigint,
   listLength: number,
+  curve: Curve,
 ): Promise<string[]> {
   let txs = await getTxHistory();
   let accounts = txs.map((tx) => {
@@ -26,15 +28,39 @@ export async function getAddresses(
   });
 
   let validAddresses: string[] = [];
-
   while (validAddresses.length < listLength) {
     const newAddresses: string[] = [];
     for (let i = 0; i < accounts.length; i++) {
       const account = accounts[i];
       if (await isSender(account)) {
-        const balance = await getXrpBalance(account.address);
-        if (balance >= amountMin) {
-          newAddresses.push(account.address);
+        let balance: bigint;
+        switch (curve) {
+        case Curve.SECP256k1:
+          if (
+            !account.pubKey.startsWith("02") &&
+              !account.pubKey.startsWith("03")
+          )
+            break;
+          balance = await getXrpBalance(account.address);
+          if (balance >= amountMin) {
+            newAddresses.push(account.address);
+          }
+          break;
+        case Curve.ED25519:
+          if (!account.pubKey.startsWith("ED")) break;
+          balance = await getXrpBalance(account.address);
+          if (balance >= amountMin) {
+            newAddresses.push(account.address);
+          }
+          break;
+        case Curve.ALL:
+          balance = await getXrpBalance(account.address);
+          if (balance >= amountMin) {
+            newAddresses.push(account.address);
+          }
+          break;
+        default:
+          throw new Error("unsupported curve");
         }
       }
     }
@@ -54,6 +80,7 @@ export async function getAddresses(
       } as XrplAccount;
     });
   }
+
   return validAddresses.slice(0, listLength);
 }
 
