@@ -7,4 +7,8 @@ import { Curve } from "./utils/curves";
  *
  * @returns {Promise<string[]>} The addresses from the XRPL ledger where balance >= amountMin
  */
-export declare function getAddresses(amountMin: bigint, listLength: number, curve: Curve): Promise<string[]>;
+export declare function getAddresses(
+  amountMin: bigint,
+  listLength: number,
+  curve: Curve,
+): Promise<string[]>;
