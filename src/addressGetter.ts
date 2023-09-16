@@ -35,32 +35,32 @@ export async function getAddresses(
       if (await isSender(account)) {
         let balance: bigint;
         switch (curve) {
-        case Curve.SECP256k1:
-          if (
-            !account.pubKey.startsWith("02") &&
+          case Curve.SECP256k1:
+            if (
+              !account.pubKey.startsWith("02") &&
               !account.pubKey.startsWith("03")
-          )
+            )
+              break;
+            balance = await getXrpBalance(account.address);
+            if (balance >= amountMin) {
+              newAddresses.push(account.address);
+            }
             break;
-          balance = await getXrpBalance(account.address);
-          if (balance >= amountMin) {
-            newAddresses.push(account.address);
-          }
-          break;
-        case Curve.ED25519:
-          if (!account.pubKey.startsWith("ED")) break;
-          balance = await getXrpBalance(account.address);
-          if (balance >= amountMin) {
-            newAddresses.push(account.address);
-          }
-          break;
-        case Curve.ALL:
-          balance = await getXrpBalance(account.address);
-          if (balance >= amountMin) {
-            newAddresses.push(account.address);
-          }
-          break;
-        default:
-          throw new Error("unsupported curve");
+          case Curve.ED25519:
+            if (!account.pubKey.startsWith("ED")) break;
+            balance = await getXrpBalance(account.address);
+            if (balance >= amountMin) {
+              newAddresses.push(account.address);
+            }
+            break;
+          case Curve.ALL:
+            balance = await getXrpBalance(account.address);
+            if (balance >= amountMin) {
+              newAddresses.push(account.address);
+            }
+            break;
+          default:
+            throw new Error("unsupported curve");
         }
       }
     }

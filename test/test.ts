@@ -14,6 +14,6 @@ const addresses = [
 
   // combined calls to getAddresses and getPubKeysFromAddresses
   const retrievedAddresses = await getAddresses(10n, 2, Curve.ALL);
-  console.log("addresses: ", retrievedAddresses);
+  // console.log("addresses: ", retrievedAddresses);
   console.log(await getPubKeysFromAddresses(retrievedAddresses));
 })();
