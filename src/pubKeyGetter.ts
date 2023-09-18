@@ -22,17 +22,17 @@ export interface Account {
 export async function getPubKeysFromAddresses(
   addresses: string[],
 ): Promise<Account[]> {
-  // get the xPubKeys from the addresses
-  const xPubKeys = await Promise.all(
+  // get the Signing pubkey from the addresses
+  const SigningPubKeys = await Promise.all(
     addresses.map(async (address) => {
       const latestTx = await getLatestTx(address);
-      const xPubkey = getXPubkeyFromLatestTx(latestTx);
-      return xPubkey;
+      const SigningPubKey = getSigningPubkeyFromLatestTx(latestTx);
+      return SigningPubKey;
     }),
   );
 
-  // get the Y values from the xPubKeys
-  const values: [bigint, bigint, string][] = getYPubKeys(xPubKeys);
+  // get the X,Y coordinates from the signing pub key
+  const values: [bigint, bigint, string][] = getPubKeysPoints(SigningPubKeys);
 
   return addresses.map((address, index) => {
     return {
@@ -69,17 +69,20 @@ export async function getLatestTx(
 
 /**
  * Get the pubkey from the latest transaction
+ * https://xrpl.org/tx.html#tx
  *
  * @param latestTx - The latest transaction from an address
- * @returns The pubkey from the latest transaction
+ * @returns The signing pubkey from the latest transaction
  */
-export function getXPubkeyFromLatestTx(
+export function getSigningPubkeyFromLatestTx(
   latestTx: AccountTxTransaction[],
 ): string {
   for (let i = 0; i < latestTx.length; i++) {
     // Check if the Account in the .tx is the address derived from the pubkey
     const signingPubKey = latestTx[i]?.tx?.SigningPubKey ?? "0x";
-    if (getAddressFromXPubkey(signingPubKey) === latestTx[i].tx?.Account) {
+    if (
+      getAddressFromSigningPubkey(signingPubKey) === latestTx[i].tx?.Account
+    ) {
       return signingPubKey;
     }
   }
@@ -92,7 +95,7 @@ export function getXPubkeyFromLatestTx(
  * @param pubkeyHex - The pubkey to get the XRPL address from
  * @returns The XRPL address (base58 encoded)
  */
-export function getAddressFromXPubkey(pubkeyHex: string): string {
+export function getAddressFromSigningPubkey(pubkeyHex: string): string {
   const pubkey = Buffer.from(pubkeyHex, "hex");
   assert(pubkey.length == 33);
   // Calculate the RIPEMD160 hash of the SHA-256 hash of the public key
@@ -117,32 +120,41 @@ export function getAddressFromXPubkey(pubkeyHex: string): string {
 }
 
 /**
- * Get the corresponding Y values from the xPubKeys for the SECP256k1 curve
+ * Get the corresponding X,Y values from the signing pub key
  *
- * @param xPubKeys - The xPubKeys to get the Y values from
- *
- * @returns The Y values from the xPubKeys
+ * @param SigningPubKeys - The signing pub key to get the X,Y values from
+ * @returns The X,Y values from the singning pub key and the curve
  */
-function getYPubKeys(xPubKeys: string[]): [bigint, bigint, string][] {
-  return xPubKeys.map((xPubKey) => {
+function getPubKeysPoints(
+  SigningPubKeys: string[],
+): [bigint, bigint, string][] {
+  return SigningPubKeys.map((signingPubKey) => {
     // Check which curve we are on
-    if (xPubKey.startsWith("ED")) {
+    if (signingPubKey.startsWith("ED")) {
       // Compute on ed25519
       try {
-        // Use the `curve.pointFromX()` method to retrieve the point on the curve
+        // Use the `curve.keyFromPublic` method to create a Keypair based on the signing pubkey
+        // The keypair is encoded
         // Get ride of the ED prefix indicating that the curve is on ed25519
-        const keypair = ed25519.keyFromPublic(xPubKey.slice(2));
-
-        const xValue = BigInt(
-          "0x" + ed25519.decodePoint(keypair.getPublic()).getX().toString(16),
-        );
-        console.log(xValue);
-        const yValue = BigInt(
-          "0x" + ed25519.decodePoint(keypair.getPublic()).getY().toString(16),
-        );
-        return [xValue, yValue, "ed25519"] as [bigint, bigint, string];
+        const keypair = ed25519.keyFromPublic(signingPubKey.slice(2));
+        // get the X and Y value by decoding the point
+        const xValue = ed25519
+          .decodePoint(keypair.getPublic())
+          .getX()
+          .toString(16);
+        const yValue = ed25519
+          .decodePoint(keypair.getPublic())
+          .getY()
+          .toString(16);
+        return [BigInt("0x" + xValue), BigInt("0x" + yValue), "ed25519"] as [
+          bigint,
+          bigint,
+          string,
+        ];
       } catch (error) {
-        throw new Error("Invalid x-coordinate value: " + error);
+        throw new Error(
+          "Error while computing coordinates on ed25519: " + error,
+        );
       }
     } else {
       // Compute on secp256k1
@@ -150,7 +162,7 @@ function getYPubKeys(xPubKeys: string[]): [bigint, bigint, string][] {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         // Get ride of the prefix (02/03) that indicate if y coordinate is odd or not
         // see xrpl doc here : https://xrpl.org/cryptographic-keys.html
-        const point = secp256k1.curve.pointFromX(xPubKey.slice(2));
+        const point = secp256k1.curve.pointFromX(signingPubKey.slice(2));
         // Access the y-coordinate from the retrieved point
         const xValue = point.getX().toString(16);
         const yValue = point.getY().toString(16);
@@ -160,7 +172,9 @@ function getYPubKeys(xPubKeys: string[]): [bigint, bigint, string][] {
           string,
         ];
       } catch (error) {
-        throw new Error("Invalid x-coordinate value: " + error);
+        throw new Error(
+          "Error while computing coordinates on secp256k1: " + error,
+        );
       }
     }
   });

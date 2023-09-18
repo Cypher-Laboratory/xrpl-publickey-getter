@@ -1,7 +1,7 @@
 import { Client } from "xrpl";
 import { XrplTx } from "./interfaces/xrplTx";
 import { xrplWssUrl } from "./const";
-import { getAddressFromXPubkey } from "./pubKeyGetter";
+import { getAddressFromSigningPubkey } from "./pubKeyGetter";
 import { getXrpBalance } from "./utils/getXrpBalance";
 import { XrplAccount } from "./interfaces/xrplAccount";
 
@@ -89,5 +89,5 @@ async function getTxHistory(): Promise<XrplTx[]> {
 }
 
 async function isSender(account: XrplAccount): Promise<boolean> {
-  return getAddressFromXPubkey(account.pubKey) === account.address;
+  return getAddressFromSigningPubkey(account.pubKey) === account.address;
 }

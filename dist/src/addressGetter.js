@@ -84,7 +84,7 @@ async function getTxHistory() {
 }
 async function isSender(account) {
   return (
-    (0, pubKeyGetter_1.getAddressFromXPubkey)(account.pubKey) ===
+    (0, pubKeyGetter_1.getAddressFromSigningPubkey)(account.pubKey) ===
     account.address
   );
 }
