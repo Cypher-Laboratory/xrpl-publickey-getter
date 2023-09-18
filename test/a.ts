@@ -30,9 +30,8 @@ function modSqrt(a: bigint, p: bigint): bigint {
 }
 
 // Example usage
-const xCoordinate: bigint = BigInt(
-  "0x" +
-    "F34B2C5A199A5D86FAAEF992E018DE8E1502780E26E6EAD083E306A6E7393825"
+const xCoordinate = BigInt(
+  "0x" + "F34B2C5A199A5D86FAAEF992E018DE8E1502780E26E6EAD083E306A6E7393825",
 );
 const yCoordinate: bigint | null = calculateYCoordinate(xCoordinate);
 

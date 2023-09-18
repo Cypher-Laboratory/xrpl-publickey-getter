@@ -5,7 +5,7 @@ import { Client, AccountTxTransaction } from "xrpl";
 import * as assert from "assert";
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 import * as baseX from "base-x";
-import { ec,eddsa } from "elliptic";
+import { ec, eddsa } from "elliptic";
 import { xrplWssUrl } from "./const";
 import { createHash } from "node:crypto";
 
@@ -32,7 +32,7 @@ export async function getPubKeysFromAddresses(
   );
 
   // get the Y values from the xPubKeys
-  const values: [bigint,bigint, string][] = getYPubKeys(xPubKeys);
+  const values: [bigint, bigint, string][] = getYPubKeys(xPubKeys);
 
   return addresses.map((address, index) => {
     return {
@@ -131,12 +131,16 @@ function getYPubKeys(xPubKeys: string[]): [bigint, bigint, string][] {
       try {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         // Get ride of the ED prefix indicating that the curve is on ed25519
-        const keypair = ed25519.keyFromPublic(xPubKey.slice(2)); 
-       
-        const xValue = BigInt("0x"+ed25519.decodePoint(keypair.getPublic()).getX().toString(16));
-        console.log(xValue); 
-        const yValue = BigInt("0x"+ed25519.decodePoint(keypair.getPublic()).getY().toString(16));
-        return [xValue,yValue, "ed25519"] as [bigint, bigint, string];
+        const keypair = ed25519.keyFromPublic(xPubKey.slice(2));
+
+        const xValue = BigInt(
+          "0x" + ed25519.decodePoint(keypair.getPublic()).getX().toString(16),
+        );
+        console.log(xValue);
+        const yValue = BigInt(
+          "0x" + ed25519.decodePoint(keypair.getPublic()).getY().toString(16),
+        );
+        return [xValue, yValue, "ed25519"] as [bigint, bigint, string];
       } catch (error) {
         throw new Error("Invalid x-coordinate value: " + error);
       }
@@ -146,11 +150,15 @@ function getYPubKeys(xPubKeys: string[]): [bigint, bigint, string][] {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         // Get ride of the prefix (02/03) that indicate if y coordinate is odd or not
         // see xrpl doc here : https://xrpl.org/cryptographic-keys.html
-        const point = secp256k1.curve.pointFromX((xPubKey).slice(2));
+        const point = secp256k1.curve.pointFromX(xPubKey.slice(2));
         // Access the y-coordinate from the retrieved point
-        const xValue = point.getX().toString(16); 
+        const xValue = point.getX().toString(16);
         const yValue = point.getY().toString(16);
-        return [BigInt("0x"+xValue),BigInt("0x"+yValue), "secp256k1"] as [bigint,bigint, string];
+        return [BigInt("0x" + xValue), BigInt("0x" + yValue), "secp256k1"] as [
+          bigint,
+          bigint,
+          string,
+        ];
       } catch (error) {
         throw new Error("Invalid x-coordinate value: " + error);
       }
