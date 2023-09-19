@@ -2,8 +2,8 @@
 // IMPORTANT LINK : https://github.com/XRPLF/xrpl-dev-portal/blob/master/content/_code-samples/address_encoding/js/encode_address.js
 // IMPORTANT LINK : https://xrpl.org/accounts.html#addresses
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAddressFromXPubkey =
-  exports.getXPubkeyFromLatestTx =
+exports.getAddressFromSigningPubkey =
+  exports.getSigningPubkeyFromLatestTx =
   exports.getLatestTx =
   exports.getPubKeysFromAddresses =
     void 0;
@@ -16,23 +16,23 @@ const const_1 = require("./const");
 const node_crypto_1 = require("node:crypto");
 const base58 = baseX(R_B58_DICT);
 const secp256k1 = new elliptic_1.ec("secp256k1");
-const ed25519 = new elliptic_1.ec("ed25519");
+const ed25519 = new elliptic_1.eddsa("ed25519");
 async function getPubKeysFromAddresses(addresses) {
-  // get the xPubKeys from the addresses
-  const xPubKeys = await Promise.all(
+  // get the Signing pubkey from the addresses
+  const SigningPubKeys = await Promise.all(
     addresses.map(async (address) => {
       const latestTx = await getLatestTx(address);
-      const xPubkey = getXPubkeyFromLatestTx(latestTx);
-      return xPubkey;
+      const SigningPubKey = getSigningPubkeyFromLatestTx(latestTx);
+      return SigningPubKey;
     }),
   );
-  // get the Y values from the xPubKeys
-  const yValues = getYPubKeys(xPubKeys);
+  // get the X,Y coordinates from the signing pub key
+  const values = getPubKeysPoints(SigningPubKeys);
   return addresses.map((address, index) => {
     return {
       address,
-      publicKey: [BigInt("0x" + xPubKeys[index]), yValues[index][0]],
-      curve: yValues[index][1],
+      publicKey: [values[index][0], values[index][1]],
+      curve: values[index][2],
     };
   });
 }
@@ -60,28 +60,31 @@ async function getLatestTx(address) {
 exports.getLatestTx = getLatestTx;
 /**
  * Get the pubkey from the latest transaction
+ * https://xrpl.org/tx.html#tx
  *
  * @param latestTx - The latest transaction from an address
- * @returns The pubkey from the latest transaction
+ * @returns The signing pubkey from the latest transaction
  */
-function getXPubkeyFromLatestTx(latestTx) {
+function getSigningPubkeyFromLatestTx(latestTx) {
   for (let i = 0; i < latestTx.length; i++) {
     // Check if the Account in the .tx is the address derived from the pubkey
     const signingPubKey = latestTx[i]?.tx?.SigningPubKey ?? "0x";
-    if (getAddressFromXPubkey(signingPubKey) === latestTx[i].tx?.Account) {
+    if (
+      getAddressFromSigningPubkey(signingPubKey) === latestTx[i].tx?.Account
+    ) {
       return signingPubKey;
     }
   }
   throw new Error("No valid pubkey found in the latest transactions");
 }
-exports.getXPubkeyFromLatestTx = getXPubkeyFromLatestTx;
+exports.getSigningPubkeyFromLatestTx = getSigningPubkeyFromLatestTx;
 /**
  * Get the XRPL address from the xPubkey
  *
  * @param pubkeyHex - The pubkey to get the XRPL address from
  * @returns The XRPL address (base58 encoded)
  */
-function getAddressFromXPubkey(pubkeyHex) {
+function getAddressFromSigningPubkey(pubkeyHex) {
   const pubkey = Buffer.from(pubkeyHex, "hex");
   assert(pubkey.length == 33);
   // Calculate the RIPEMD160 hash of the SHA-256 hash of the public key
@@ -110,28 +113,37 @@ function getAddressFromXPubkey(pubkeyHex) {
   const address = base58.encode(dataToEncode);
   return address;
 }
-exports.getAddressFromXPubkey = getAddressFromXPubkey;
+exports.getAddressFromSigningPubkey = getAddressFromSigningPubkey;
 /**
  * Get the corresponding Y values from the xPubKeys for the SECP256k1 curve
  *
- * @param xPubKeys - The xPubKeys to get the Y values from
- *
+ * @param SigningPubKeys - The xPubKeys to get the Y values from
  * @returns The Y values from the xPubKeys
  */
-function getYPubKeys(xPubKeys) {
-  return xPubKeys.map((xPubKey) => {
+function getPubKeysPoints(SigningPubKeys) {
+  return SigningPubKeys.map((signingPubKey) => {
     // Check which curve we are on
-    if (xPubKey.startsWith("ED")) {
+    if (signingPubKey.startsWith("ED")) {
       // Compute on ed25519
       try {
-        // Use the `curve.pointFromX()` method to retrieve the point on the curve
+        // Use the `curve.keyFromPublic` method to create a Keypair based on the signing pubkey
+        // The keypair is encoded
         // Get ride of the ED prefix indicating that the curve is on ed25519
-        const point = ed25519.curve.pointFromX(xPubKey.slice(2));
-        // Access the y-coordinate from the retrieved point
-        const yValue = point.getY().toString();
-        return [BigInt(yValue), "ed25519"];
+        const keypair = ed25519.keyFromPublic(signingPubKey.slice(2));
+        // get the X and Y value by decoding the point
+        const xValue = ed25519
+          .decodePoint(keypair.getPublic())
+          .getX()
+          .toString(16);
+        const yValue = ed25519
+          .decodePoint(keypair.getPublic())
+          .getY()
+          .toString(16);
+        return [BigInt("0x" + xValue), BigInt("0x" + yValue), "ed25519"];
       } catch (error) {
-        throw new Error("Invalid x-coordinate value: " + error);
+        throw new Error(
+          "Error while computing coordinates on ed25519: " + error,
+        );
       }
     } else {
       // Compute on secp256k1
@@ -139,12 +151,16 @@ function getYPubKeys(xPubKeys) {
         // Use the `curve.pointFromX()` method to retrieve the point on the curve
         // Get ride of the prefix (02/03) that indicate if y coordinate is odd or not
         // see xrpl doc here : https://xrpl.org/cryptographic-keys.html
-        const point = secp256k1.curve.pointFromX(xPubKey.slice(2));
+        const point = secp256k1.curve.pointFromX(signingPubKey.slice(2));
+
         // Access the y-coordinate from the retrieved point
-        const yValue = point.getY().toString();
-        return [BigInt(yValue), "secp256k1"];
+        const xValue = point.getX().toString(16);
+        const yValue = point.getY().toString(16);
+        return [BigInt("0x" + xValue), BigInt("0x" + yValue), "secp256k1"];
       } catch (error) {
-        throw new Error("Invalid x-coordinate value: " + error);
+        throw new Error(
+          "Error while computing coordinates on secp256k1: " + error,
+        );
       }
     }
   });

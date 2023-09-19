@@ -18,11 +18,12 @@ export declare function getLatestTx(
 ): Promise<AccountTxTransaction[]>;
 /**
  * Get the pubkey from the latest transaction
+ * https://xrpl.org/tx.html#tx
  *
  * @param latestTx - The latest transaction from an address
- * @returns The pubkey from the latest transaction
+ * @returns The signing pubkey from the latest transaction
  */
-export declare function getXPubkeyFromLatestTx(
+export declare function getSigningPubkeyFromLatestTx(
   latestTx: AccountTxTransaction[],
 ): string;
 /**
@@ -31,4 +32,4 @@ export declare function getXPubkeyFromLatestTx(
  * @param pubkeyHex - The pubkey to get the XRPL address from
  * @returns The XRPL address (base58 encoded)
  */
-export declare function getAddressFromXPubkey(pubkeyHex: string): string;
+export declare function getAddressFromSigningPubkey(pubkeyHex: string): string;
