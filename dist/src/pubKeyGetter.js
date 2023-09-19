@@ -152,6 +152,7 @@ function getPubKeysPoints(SigningPubKeys) {
         // Get ride of the prefix (02/03) that indicate if y coordinate is odd or not
         // see xrpl doc here : https://xrpl.org/cryptographic-keys.html
         const point = secp256k1.curve.pointFromX(signingPubKey.slice(2));
+
         // Access the y-coordinate from the retrieved point
         const xValue = point.getX().toString(16);
         const yValue = point.getY().toString(16);

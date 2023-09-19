@@ -1,10 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAddresses = void 0;
+/* eslint-disable indent */
 const xrpl_1 = require("xrpl");
 const const_1 = require("./const");
 const pubKeyGetter_1 = require("./pubKeyGetter");
 const getXrpBalance_1 = require("./utils/getXrpBalance");
+const curves_1 = require("./utils/curves");
 /**
  * Get the addresses from the XRPL ledger where balance >= amountMin
  *
@@ -13,7 +15,7 @@ const getXrpBalance_1 = require("./utils/getXrpBalance");
  *
  * @returns {Promise<string[]>} The addresses from the XRPL ledger where balance >= amountMin
  */
-async function getAddresses(amountMin, listLength) {
+async function getAddresses(amountMin, listLength, curve) {
   let txs = await getTxHistory();
   let accounts = txs.map((tx) => {
     return {
@@ -27,11 +29,34 @@ async function getAddresses(amountMin, listLength) {
     for (let i = 0; i < accounts.length; i++) {
       const account = accounts[i];
       if (await isSender(account)) {
-        const balance = await (0, getXrpBalance_1.getXrpBalance)(
-          account.address,
-        );
-        if (balance >= amountMin) {
-          newAddresses.push(account.address);
+        let balance;
+        switch (curve) {
+          case curves_1.Curve.SECP256k1:
+            if (
+              !account.pubKey.startsWith("02") &&
+              !account.pubKey.startsWith("03")
+            )
+              break;
+            balance = await (0, getXrpBalance_1.getXrpBalance)(account.address);
+            if (balance >= amountMin) {
+              newAddresses.push(account.address);
+            }
+            break;
+          case curves_1.Curve.ED25519:
+            if (!account.pubKey.startsWith("ED")) break;
+            balance = await (0, getXrpBalance_1.getXrpBalance)(account.address);
+            if (balance >= amountMin) {
+              newAddresses.push(account.address);
+            }
+            break;
+          case curves_1.Curve.ALL:
+            balance = await (0, getXrpBalance_1.getXrpBalance)(account.address);
+            if (balance >= amountMin) {
+              newAddresses.push(account.address);
+            }
+            break;
+          default:
+            throw new Error("unsupported curve");
         }
       }
     }

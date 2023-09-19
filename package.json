@@ -12,7 +12,8 @@
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "fmt:check": "npm run prettier && npm run lint",
-    "fmt": "npm run prettier:fix && npm run lint:fix"
+    "fmt": "npm run prettier:fix && npm run lint:fix",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
