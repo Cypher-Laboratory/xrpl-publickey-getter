@@ -1,6 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPubKeysFromAddresses = exports.Curve = exports.getAddresses = void 0;
+exports.getAddressFromSigningPubkey =
+  exports.getPubKeysFromAddresses =
+  exports.Curve =
+  exports.getAddresses =
+    void 0;
 var addressGetter_1 = require("./addressGetter");
 Object.defineProperty(exports, "getAddresses", {
   enumerable: true,
@@ -20,5 +24,11 @@ Object.defineProperty(exports, "getPubKeysFromAddresses", {
   enumerable: true,
   get: function () {
     return pubKeyGetter_1.getPubKeysFromAddresses;
+  },
+});
+Object.defineProperty(exports, "getAddressFromSigningPubkey", {
+  enumerable: true,
+  get: function () {
+    return pubKeyGetter_1.getAddressFromSigningPubkey;
   },
 });
