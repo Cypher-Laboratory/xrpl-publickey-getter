@@ -1,7 +1,7 @@
 # XRPL-pubKey-getter
 
 Public Key Retrieval for XRPL Accounts
-This repository provides functionality to retrieve the public key from XRPL (XRP Ledger) addresses that meet specific characteristics. 
+This repository provides functionality to retrieve the public key from XRPL (XRP Ledger) addresses that meet specific characteristics.
 The purpose is to identify accounts that satisfy certain criteria, such as holding a specific amount of XRP or having a specific trustline established. To use them in a ring-signature scheme.
 
 ## How it Works

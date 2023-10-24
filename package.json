@@ -1,5 +1,5 @@
 {
-  "name": "@cypherlab/xrpl-publicKey-getter",
+  "name": "xrpl-publicKey-getter",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
@@ -13,7 +13,7 @@
     "prettier:fix": "prettier --write .",
     "fmt:check": "npm run prettier && npm run lint",
     "fmt": "npm run prettier:fix && npm run lint:fix",
-    "build": "tsc"
+    "build": "rm -r ./dist && npm run fmt && tsc"
   },
   "repository": {
     "type": "git",
