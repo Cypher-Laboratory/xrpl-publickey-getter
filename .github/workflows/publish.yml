@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: "18.x" # Ensure this is compatible with your project
           registry-url: "https://npm.pkg.github.com"
-          scope: "@cypherlab"
+          scope: "@cypher-laboratory"
       - run: npm ci
       - run: npm publish
         env:
