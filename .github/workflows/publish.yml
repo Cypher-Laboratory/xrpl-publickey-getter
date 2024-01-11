@@ -1,4 +1,4 @@
-name: Node.js CI and Publish
+name: Publish on github packages
 
 on:
   push:
@@ -9,9 +9,8 @@ on:
   workflow_call:
 
 jobs:
-  publish:
+  build-and-publish-to-github-packages:
     runs-on: ubuntu-latest
-    needs: build
     permissions:
       contents: read
       packages: write
@@ -27,3 +26,5 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_LEJAMON }}
+
+  
