@@ -13,7 +13,7 @@ const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 const baseX = require("base-x");
 const elliptic_1 = require("elliptic");
 const const_1 = require("./const");
-const node_crypto_1 = require("node:crypto");
+const crypto_1 = require("crypto");
 const base58 = baseX(R_B58_DICT);
 const secp256k1 = new elliptic_1.ec("secp256k1");
 const ed25519 = new elliptic_1.eddsa("ed25519");
@@ -89,10 +89,8 @@ function getAddressFromSigningPubkey(pubkeyHex) {
   assert(pubkey.length == 33);
   // Calculate the RIPEMD160 hash of the SHA-256 hash of the public key
   //   This is the "Account ID"
-  const pubkey_inner_hash = (0, node_crypto_1.createHash)("sha256").update(
-    pubkey,
-  );
-  const pubkey_outer_hash = (0, node_crypto_1.createHash)("ripemd160");
+  const pubkey_inner_hash = (0, crypto_1.createHash)("sha256").update(pubkey);
+  const pubkey_outer_hash = (0, crypto_1.createHash)("ripemd160");
   pubkey_outer_hash.update(pubkey_inner_hash.digest());
   const account_id = pubkey_outer_hash.digest();
   // Prefix the Account ID with the type prefix for an XRPL Classic Address, then
@@ -100,10 +98,10 @@ function getAddressFromSigningPubkey(pubkeyHex) {
   //   of the Account ID
   const address_type_prefix = Buffer.from([0x00]);
   const payload = Buffer.concat([address_type_prefix, account_id]);
-  const chksum_hash1 = (0, node_crypto_1.createHash)("sha256")
+  const chksum_hash1 = (0, crypto_1.createHash)("sha256")
     .update(payload)
     .digest();
-  const chksum_hash2 = (0, node_crypto_1.createHash)("sha256")
+  const chksum_hash2 = (0, crypto_1.createHash)("sha256")
     .update(chksum_hash1)
     .digest();
   const checksum = chksum_hash2.slice(0, 4);
