@@ -20,8 +20,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@cypherLab"
       - run: npm ci
       - run: npm run fmt:check
       - run: npm test
@@ -35,10 +33,11 @@ jobs:
       - uses: actions/checkout@v3
       - name: Use Node.js
         uses: actions/setup-node@v3
-        with:
-          node-version: "18.x" # or '16.x', choose the version you want to publish with
-          cache: "npm"
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@cypherLab"
-      - run: npm ci
-      - run: npm publish
+       with:
+        node-version: '18.x' # or '16.x', choose the version you want to publish with
+        cache: 'npm'
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@Cypher-Laboratory
+    - run: npm ci
+    - run: npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GH_PACKAGE_LEJAMON }}
+    - run: npm publish
