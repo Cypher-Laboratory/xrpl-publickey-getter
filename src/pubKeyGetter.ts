@@ -7,7 +7,7 @@ const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 import * as baseX from "base-x";
 import { ec, eddsa } from "elliptic";
 import { xrplWssUrl } from "./const";
-import { createHash } from "node:crypto";
+import { createHash } from "crypto";
 
 const base58 = baseX(R_B58_DICT);
 const secp256k1 = new ec("secp256k1");

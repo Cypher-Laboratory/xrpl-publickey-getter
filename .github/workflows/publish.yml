@@ -1,0 +1,29 @@
+name: Node.js CI and Publish
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+  workflow_call:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18.x" # Ensure this is compatible with your project
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@cypherlab"
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_LEJAMON }}
