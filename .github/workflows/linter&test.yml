@@ -25,4 +25,20 @@ jobs:
       - run: npm ci
       - run: npm run fmt:check
       - run: npm test
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    if: success() && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x' # or '16.x', choose the version you want to publish with
+          cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@cypherLab'
+      - run: npm ci
       - run: npm publish
