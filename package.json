@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "",
   "main": "dist/src/index.js",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/@cypherLab"
+  },
   "module": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {

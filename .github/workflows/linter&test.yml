@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@cypherLab"
       - run: npm ci
       - run: npm run fmt:check
       - run: npm test
+      - run: npm publish
