@@ -4,4 +4,5 @@ export {
   getPubKeysFromAddresses,
   getAddressFromSigningPubkey,
   Account,
+  getPubKeysPoints,
 } from "./pubKeyGetter";

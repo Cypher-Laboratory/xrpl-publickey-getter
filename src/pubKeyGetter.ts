@@ -125,7 +125,7 @@ export function getAddressFromSigningPubkey(pubkeyHex: string): string {
  * @param SigningPubKeys - The signing pub key to get the X,Y values from
  * @returns The X,Y values from the singning pub key and the curve
  */
-function getPubKeysPoints(
+export function getPubKeysPoints(
   SigningPubKeys: string[],
 ): [bigint, bigint, string][] {
   return SigningPubKeys.map((signingPubKey) => {
