@@ -2,9 +2,7 @@ name: Publish Package to npmjs
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - main
+
 jobs:
   test:
     uses: ./.github/workflows/linter&test.yml
