@@ -1,4 +1,4 @@
 export interface XrplAccount {
-    address: string;
-    pubKey: string;
+  address: string;
+  pubKey: string;
 }
