@@ -1,6 +1,6 @@
 {
   "name": "@cypherlaboratory/xrpl-publickey-getter",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
