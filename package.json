@@ -1,5 +1,5 @@
 {
-  "name": "@cypherlaboratory/xrpl-publickey-getter",
+  "name": "@cypher-laboratory/xrpl-publickey-getter",
   "version": "0.0.3",
   "description": "",
   "main": "dist/src/index.js",
